@@ -27,4 +27,72 @@ class MCPClient {
             version: '1.0.0',
         })
     }
+
+    async connectToServer(serverScriptPath: string) {
+        try {
+            const isJs = serverScriptPath.endsWith('.js');
+            const isPy = serverScriptPath.endsWith('.py');
+            if (!isJs && !isPy) {
+                throw new Error('Server script must be a .js or .py file');
+            }
+
+            const command = isPy
+                ? process.platform === 'win32'
+                    ? 'python'
+                    : 'python3'
+                : process.execPath;
+
+            this.transport = new StdioClientTransport({
+                command,
+                args: [serverScriptPath],
+            })
+
+            this.mcp.connect(this.transport);
+
+            const toolsResult = await this.mcp.listTools();
+            this.tools = toolsResult.tools.map((tool) => {
+                return {
+                    name: tool.name,
+                    description: tool.description,
+                    input_schema: tool.inputSchema
+                }
+            });
+
+            console.log(
+                "Connected to server with tools:",
+                this.tools.map(({ name }) => name)
+            )
+        } catch (error) {
+            console.error('Failed to connect to server:', error);
+            throw error;
+        }
+    }
+
+    async chatLoop() {
+
+    }
+
+    async cleanup() {
+
+    }
 }
+
+
+
+async function main() {
+    if (process.argv.length < 3) {
+        console.log('Usage: node index.ts <path_to_server_script>');
+        return;
+    }
+
+    const mcpClient = new MCPClient();
+    try {
+        await mcpClient.connectToServer(process.argv[2]!);
+        await mcpClient.chatLoop();
+    } finally {
+        await mcpClient.cleanup();
+        process.exit(0);
+    }
+}
+
+main();
