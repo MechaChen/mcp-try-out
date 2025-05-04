@@ -27,9 +27,9 @@ async function makeNWSRequest<T>(url: string): Promise<T | null> {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        return (await response.json()) as T;
+        const data = await response.json();
+        return data as T;
     } catch (error) {
-        console.error('Error fetching data:', error);
         return null;
     }
 }
@@ -198,10 +198,8 @@ server.tool(
 async function main() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.error("Weather MCP Server running on stdio");
 }
   
 main().catch((error) => {
     console.error("Fatal error in main():", error);
-    process.exit(1);
 });

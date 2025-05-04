@@ -129,11 +129,17 @@ server.tool('get-forecast', 'Get weather forecast for a location', {
     };
 });
 async function main() {
-    const transport = new StdioServerTransport();
-    await server.connect(transport);
-    console.error("Weather MCP Server running on stdio");
+    try {
+        const transport = new StdioServerTransport();
+        await server.connect(transport);
+        console.error("Weather MCP Server running on stdio");
+    }
+    catch (error) {
+        console.error("Error in main():", error);
+        // Don't exit immediately, let the process handle the error
+    }
 }
 main().catch((error) => {
     console.error("Fatal error in main():", error);
-    process.exit(1);
+    // Don't exit immediately, let the process handle the error
 });
