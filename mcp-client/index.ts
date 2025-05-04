@@ -126,11 +126,31 @@ class MCPClient {
     }
 
     async chatLoop() {
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        })
 
+        try {
+            console.log(`\nMCP Client Started!`);
+            console.log("Type your queries or 'quit' to exit");
+
+            while (true) {
+                const message = await rl.question('\nQuery: ');
+                if (message.toLowerCase() === 'quit') {
+                    break;
+                }
+
+                const response = await this.processQuery(message);
+                console.log(`\n${response}`);
+            }
+        } finally {
+            rl.close();
+        }
     }
 
     async cleanup() {
-
+        await this.mcp.close();
     }
 }
 
